@@ -10,7 +10,7 @@ import numpy as np
 
 def regression(x, y, **kwargs):
     """Implements stochastic gradient decent on softmax regression as seen in
-    Stanford 229
+    Stanford 229 (http://cs229.stanford.edu/notes/cs229-notes1.pdf)
     Args:
       x: The covariates or factors of the model in an n by m array (n is number)
         of data points and m is number of factors
