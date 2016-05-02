@@ -80,7 +80,7 @@ def train(x, y, **kwargs):
 
 def predict(x, model_path):
     """Predicts targets using a batch of predictors and a model trained by
-    the linear regression train method
+    the linear regress train method
     Args:
       x: The covariates or factors of the model in an n by m array (n is number)
         of data points and m is number of factors
