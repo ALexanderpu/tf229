@@ -7,7 +7,7 @@ from collections import namedtuple
 import tensorflow as tf
 import numpy as np
 
-def train(x, y, model_path=""):
+def regression(x, y):
     """Implements the naive bayes algorithm from Stanford 229
      (http://cs229.stanford.edu/notes/cs229-notes2.pdf)
     Args:
@@ -37,11 +37,10 @@ def train(x, y, model_path=""):
         # add the number of classes to each ~ Laplace Smoothing
         normalization = tf.reduce_sum(Y, 0) + num_classes
 
+        # sum along the num_predictors axis => batch_size,1
         Phis = summed_occurances / normalization
 
         Ps = tf.reduce_mean(Y, 0)
-
-        saver = tf.train.Saver([Phis, Ps])
 
         init = tf.initialize_all_variables()
 
@@ -52,24 +51,8 @@ def train(x, y, model_path=""):
                 [Phis, Ps],
                 feed_dict={X:x, Y:y})
 
-            if model_path:
-                saver.save(sess, model_path)
-
             Parameters = namedtuple("Parameters", ["Phis", "Ps"])
             return Parameters(phis, ps)
-
-
-def predict(x, num_classes, model_path):
-    num_predictors = len(x)
-
-    with tf.Graph().as_default() as _:
-        X = tf.placeholder(tf.float32, [num_predictors])
-
-        Phis = tf.Variable([num_predictors, num_classes])
-
-        Ps = tf.Variable([num_classes])
-
-        saver = tf.train.Saver([Phis, Ps])
 
 
 if __name__ == "__main__":
@@ -78,16 +61,4 @@ if __name__ == "__main__":
     Y_TEST = np.zeros((5,3))
     Y_TEST[np.arange(5), [0,1,2,1,2]] = 1
 
-    print(train(X_TEST, Y_TEST))
-
-import tensorflow as tf
-
-sess = tf.InteractiveSession()
-
-x = tf.constant([1.0,0.0,1.0])
-
-y = tf.ones((5,3))
-
-z = x * y
-
-z.eval()
+    print(regression(X_TEST, Y_TEST))
