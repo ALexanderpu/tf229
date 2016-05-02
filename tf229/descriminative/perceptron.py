@@ -8,7 +8,7 @@ from collections import namedtuple
 import tensorflow as tf
 import numpy as np
 
-def train(x, y, **kwargs):
+def regression(x, y, **kwargs):
     """Implements stochastic gradient decent for a perceptron as seen in
     Stanford 229 (http://cs229.stanford.edu/notes/cs229-notes1.pdf)
     Args:
@@ -16,7 +16,6 @@ def train(x, y, **kwargs):
         of data points and m is number of factors
       y: The targets or labels of the model in an n by 1 array
       kwargs:
-        model_path: the location where the tf model file should be saved
         iterations: The number of steps to train
         batch_size: The number of samples to use per step
         verbosity_step: The number of steps between each printout of the cost
@@ -29,11 +28,10 @@ def train(x, y, **kwargs):
       A (Weights, Bias) tuple
     """
     # extract the kwargs
-    model_path = kwargs.get("model_path", "")
     iterations = kwargs.get("iterations", 100)
     batch_size = kwargs.get("batch_size", 10)
     verbosity_step = kwargs.get("verbosity_step", 20)
-    step_size = kwargs.get("step_size", 10e0)
+    step_size = kwargs.get("step_size", 10e-1)
     seed = kwargs.get("seed", 0)
 
     if seed:
@@ -49,8 +47,6 @@ def train(x, y, **kwargs):
 
         W = tf.Variable(tf.zeros([num_predictors, 1]))
         b = tf.Variable(1.0)
-
-        saver = tf.train.Saver([W, b])
 
         # if > 0 -> 1 else 0
         thresholded = (tf.nn.softsign(tf.matmul(X, W) + b) + 1) / 2
@@ -75,52 +71,12 @@ def train(x, y, **kwargs):
                 if i % verbosity_step == 0:
                     print(batch_cost)
 
-            if model_path:
-                saver.save(sess, model_path)
-
             Parameters = namedtuple("Parameters", ["Weights", "Biases"])
             return Parameters(weights, bais)
-
-def predict(x, model_path):
-    """Predicts targets using a batch of predictors and a model trained by
-    the perceptron train method
-    Args:
-      x: The covariates or factors of the model in an n by m array (n is number)
-        of data points and m is number of factors
-      model_path: location of the tf model file
-    Raises:
-      TODO
-    Returns:
-      a num data by 1 array of predictions
-    """
-    num_predictors = len(x[0])
-    num_data = len(x)
-
-    x = np.array(x)
-
-    with tf.Graph().as_default() as _:
-        X = tf.placeholder(tf.float32, [num_data, num_predictors])
-
-        W = tf.Variable(tf.zeros([num_predictors, 1]))
-        b = tf.Variable(1.0)
-
-        saver = tf.train.Saver([W, b])
-
-        Predictions = (tf.nn.softsign(tf.matmul(X, W) + b) + 1) / 2
-
-        with tf.Session() as sess:
-            saver.restore(sess, model_path)
-
-            predictions = sess.run([Predictions], feed_dict={X:x})
-
-            return predictions
 
 
 if __name__ == "__main__":
     X_TEST = np.reshape([0.5, 0.5, 0.5, 0.25, 0.25, 0.25], (6, 1))
     Y_TEST = np.reshape([0, 0, 0, 1, 1, 1], (6, 1))
 
-    print(train(X_TEST, Y_TEST, iterations=2000,
-        model_path="models/perceptron/perceptron"))
-
-    print(predict(X_TEST, "models/perceptron/perceptron"))
+    print(regression(X_TEST, Y_TEST, iterations=3000))
