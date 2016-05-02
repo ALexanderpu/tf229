@@ -1,0 +1,2 @@
+model_checkpoint_path: "perceptron"
+all_model_checkpoint_paths: "perceptron"
